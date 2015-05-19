@@ -13,6 +13,8 @@ public class DocumentParser {
 
 	static File file; 
 	
+	public int tabController = 1;
+	
 	public void run() throws Exception{
 		DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
 		DocumentBuilder db = dbf.newDocumentBuilder();
@@ -28,11 +30,13 @@ public class DocumentParser {
 	
 	private void parseDocument(Node node) {
 		if(node.getNodeName().equals("w:tbl")){
+			System.out.println("Table found");
 			parseTable(node);
-		} else{
+		}else{
 			NodeList nodes = node.getChildNodes();
 			for(int i = 0; i < nodes.getLength(); i++){			
-				parseDocument(nodes.item(i));			
+				parseDocument(nodes.item(i));
+				
 			}		
 		}
 	}
@@ -42,8 +46,72 @@ public class DocumentParser {
 
 
 	private void parseTable(Node node) {
-		System.out.println("Table found");
+		if(node.getNodeName().equals("w:tr")){
+			System.out.println("\t" + "Row Found");
+			parseRow(node);
+		}else{
+			NodeList nodes = node.getChildNodes();
+			for(int i = 0; i < nodes.getLength(); i++){			
+				parseTable(nodes.item(i));
+				
+			}		
+		}
 	}
+
+
+
+	private void parseRow(Node node) {
+		if(node.getNodeName().equals("w:tc")){
+			System.out.println("\t" + "\t" + "got cell");
+			getCell(node);
+		}else{
+			NodeList nodes = node.getChildNodes();
+			for(int i = 0; i < nodes.getLength(); i++){			
+				parseRow(nodes.item(i));
+				
+			}		
+		}
+	}
+
+
+	private void getText(Node node){
+		StringBuffer sb = new StringBuffer();
+		getText(node, sb);
+		String str = sb.toString();
+	}
+	
+	private void getText(Node node, StringBuffer sb){
+		sb.append("sfwer");
+		
+		getText(node, sb);
+	}
+	
+	
+	
+	private void getCell(Node node) {
+		
+		if(node.getNodeName().equals("w:t")){
+			if(tabController == 1){
+				System.out.print("\t" + "\t" + "\t");
+			}
+			System.out.print(node.getTextContent());
+		}else{
+			NodeList nodes = node.getChildNodes();
+			for(int i = 0; i < nodes.getLength(); i++){			
+				getCell(nodes.item(i));
+				
+			}		
+		}
+		
+		tabController++;
+		
+	}
+
+
+
+//	private void getText(Node node) {
+		
+//	}
 
 
 
