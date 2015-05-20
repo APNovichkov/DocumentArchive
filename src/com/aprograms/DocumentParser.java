@@ -63,7 +63,9 @@ public class DocumentParser {
 	private void parseRow(Node node) {
 		if(node.getNodeName().equals("w:tc")){
 			System.out.println("\t" + "\t" + "got cell");
+			tabController = 1;
 			getCell(node);
+			System.out.println();
 		}else{
 			NodeList nodes = node.getChildNodes();
 			for(int i = 0; i < nodes.getLength(); i++){			
@@ -73,7 +75,32 @@ public class DocumentParser {
 		}
 	}
 
+	private void getCell(Node node) {
+		if(node.getNodeName().equals("w:t")){
+			if(tabController == 1){
+				System.out.print("\t" + "\t" + "\t");
+				tabController++;
+			}
+			System.out.print(node.getTextContent());
+		}else{
+			NodeList nodes = node.getChildNodes();
+			for(int i = 0; i < nodes.getLength(); i++){			
+				getCell(nodes.item(i));
+				
+			}		
+		}
+		
+		
+		
+	}
 
+
+
+//	private void getText(Node node) {
+		
+//	}
+
+	
 	private void getText(Node node){
 		StringBuffer sb = new StringBuffer();
 		getText(node, sb);
@@ -87,32 +114,6 @@ public class DocumentParser {
 	}
 	
 	
-	
-	private void getCell(Node node) {
-		
-		if(node.getNodeName().equals("w:t")){
-			if(tabController == 1){
-				System.out.print("\t" + "\t" + "\t");
-			}
-			System.out.print(node.getTextContent());
-		}else{
-			NodeList nodes = node.getChildNodes();
-			for(int i = 0; i < nodes.getLength(); i++){			
-				getCell(nodes.item(i));
-				
-			}		
-		}
-		
-		tabController++;
-		
-	}
-
-
-
-//	private void getText(Node node) {
-		
-//	}
-
 
 
 	private void test1(Node node, String prefix) {
