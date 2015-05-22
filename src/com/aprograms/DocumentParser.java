@@ -1,6 +1,7 @@
 package com.aprograms;
 
 import java.io.File;
+import java.util.Vector;
 
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
@@ -13,7 +14,9 @@ public class DocumentParser {
 
 	static File file; 
 	
-	public int tabController = 1;
+	public int fondDocumentNumber = 1;
+	
+	Vector<FondDocument> documents;
 	
 	public void run() throws Exception{
 		DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
@@ -21,9 +24,6 @@ public class DocumentParser {
 		Document doc = db.parse(file);
 		
 		parseDocument(doc);
-		
-//		test1(doc, "");
-		
 	}
 	
 	
@@ -41,24 +41,19 @@ public class DocumentParser {
 		}
 	}
 	
-	
-
-
-
 	private void parseTable(Node node) {
 		if(node.getNodeName().equals("w:tr")){
 			System.out.println("\t" + "Row Found");
-			parseRow(node);
+			documents = new Vector<FondDocument>(fondDocumentNumber);
 		}else{
 			NodeList nodes = node.getChildNodes();
 			for(int i = 0; i < nodes.getLength(); i++){			
 				parseTable(nodes.item(i));
-				
 			}		
 		}
 	}
 
-
+/*
 
 	private void parseRow(Node node) {
 		if(node.getNodeName().equals("w:tc")){
@@ -94,7 +89,7 @@ public class DocumentParser {
 		
 	}
 
-
+*/
 
 //	private void getText(Node node) {
 		
