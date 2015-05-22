@@ -14,9 +14,9 @@ public class DocumentParser {
 
 	static File file; 
 	
-	public int fondDocumentNumber = 1;
+//	public int fondDocumentNumber = 1;
 	
-	Vector<FondDocument> documents;
+	Vector<FondDocument> documents = new Vector<FondDocument>();
 	
 	public void run() throws Exception{
 		DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
@@ -24,13 +24,22 @@ public class DocumentParser {
 		Document doc = db.parse(file);
 		
 		parseDocument(doc);
+		printFondDocuments();
 	}
 	
 	
 	
+	private void printFondDocuments() {
+		for(FondDocument fd: documents){
+			System.out.println(fd.toString());			
+		}		
+	}
+
+
+
 	private void parseDocument(Node node) {
 		if(node.getNodeName().equals("w:tbl")){
-			System.out.println("Table found");
+//			System.out.println("Table found");
 			parseTable(node);
 		}else{
 			NodeList nodes = node.getChildNodes();
@@ -43,8 +52,8 @@ public class DocumentParser {
 	
 	private void parseTable(Node node) {
 		if(node.getNodeName().equals("w:tr")){
-			System.out.println("\t" + "Row Found");
-			documents = new Vector<FondDocument>(fondDocumentNumber);
+//			System.out.println("\t" + "Row Found");
+			parseRow(node);
 		}else{
 			NodeList nodes = node.getChildNodes();
 			for(int i = 0; i < nodes.getLength(); i++){			
@@ -53,63 +62,38 @@ public class DocumentParser {
 		}
 	}
 
-/*
-
 	private void parseRow(Node node) {
-		if(node.getNodeName().equals("w:tc")){
-			System.out.println("\t" + "\t" + "got cell");
-			tabController = 1;
-			getCell(node);
-			System.out.println();
-		}else{
-			NodeList nodes = node.getChildNodes();
-			for(int i = 0; i < nodes.getLength(); i++){			
-				parseRow(nodes.item(i));
-				
-			}		
-		}
-	}
-
-	private void getCell(Node node) {
-		if(node.getNodeName().equals("w:t")){
-			if(tabController == 1){
-				System.out.print("\t" + "\t" + "\t");
-				tabController++;
-			}
-			System.out.print(node.getTextContent());
-		}else{
-			NodeList nodes = node.getChildNodes();
-			for(int i = 0; i < nodes.getLength(); i++){			
-				getCell(nodes.item(i));
-				
-			}		
-		}
-		
-		
-		
-	}
-
-*/
-
-//	private void getText(Node node) {
-		
-//	}
-
 	
-	private void getText(Node node){
+		FondDocument doc = new FondDocument();				
+		NodeList cells = node.getChildNodes();
+		
+		doc.docNumber = getText(cells.item(0));
+		doc.docName = getText(cells.item(1));
+		doc.docDates = getText(cells.item(2));
+		doc.pagesNumber = getText(cells.item(3));
+		doc.comments = getText(cells.item(4));
+		
+		documents.add(doc);
+	}
+	
+	private String getText(Node node){
 		StringBuffer sb = new StringBuffer();
 		getText(node, sb);
-		String str = sb.toString();
+		return sb.toString();
 	}
 	
 	private void getText(Node node, StringBuffer sb){
-		sb.append("sfwer");
-		
-		getText(node, sb);
+		if(node.getNodeName().equals("w:t")){
+			sb.append(node.getTextContent());
+		}else{
+			NodeList nodes = node.getChildNodes();
+			for(int i = 0; i < nodes.getLength(); i++){			
+				getText(nodes.item(i), sb);
+				
+			}		
+		}
 	}
 	
-	
-
 
 	private void test1(Node node, String prefix) {
 		

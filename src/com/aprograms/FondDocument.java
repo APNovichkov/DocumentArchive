@@ -1,6 +1,5 @@
 package com.aprograms;
 
-import org.w3c.dom.Node;
 
 
 public class FondDocument {
@@ -9,23 +8,23 @@ public class FondDocument {
 	String docDates;
 	String pagesNumber;
 	String comments;
+		
 	
-	int fondNumber;
-	
-	Node node;
-
-	public FondDocument(int fondNumber, Node node){
-		this.fondNumber = fondNumber;
-		this.node = node;
-				
+	public String _toString(){
+		return 
+				"docNumber=" + docNumber 
+				+ "\tdocName=" + docName 
+				+ "\tdocDates=" + docDates 
+				+ "\tpagesNumber=" + pagesNumber
+				+ "\tcomments=" + comments;
 	}
 	
-	
-	
-	
-	
-	
 	public String toString(){
-		return docNumber + docName + docDates + pagesNumber + comments;
+		return "Fond document"
+				+ "\n\t" + docNumber 
+				+ "\n\t" + docName 
+				+ "\n\t" + docDates 
+				+ "\n\t" + pagesNumber
+				+ "\n\t" + comments;
 	}
 }
