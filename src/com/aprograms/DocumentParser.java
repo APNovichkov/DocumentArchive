@@ -18,6 +18,8 @@ public class DocumentParser {
 	
 	Vector<FondDocument> documents = new Vector<FondDocument>();
 	
+	Vector<Fond> fonds = new Vector<Fond>();
+	
 	public void run() throws Exception{
 		DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
 		DocumentBuilder db = dbf.newDocumentBuilder();
@@ -38,6 +40,7 @@ public class DocumentParser {
 
 
 	private void parseDocument(Node node) {
+		
 		if(node.getNodeName().equals("w:tbl")){
 //			System.out.println("Table found");
 			parseTable(node);
@@ -94,23 +97,10 @@ public class DocumentParser {
 		}
 	}
 	
-
-	private void test1(Node node, String prefix) {
-		
-		if(node.getNodeName().equals("w:tbl")){
-			System.out.println(node.getTextContent());
-		}
-			
-		NodeList nodes = node.getChildNodes();
-		for(int i = 0; i < nodes.getLength(); i++){			
-			test1(nodes.item(i), prefix + "\t");			
-		}
-		
-	}
-
-
-
-	public static void main(String[] args) throws Exception {					
+	
+	private void makeFond()
+	
+public static void main(String[] args) throws Exception {					
 		file = new File(args[0]);
 		new DocumentParser().run();		
 	}
