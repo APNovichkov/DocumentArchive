@@ -7,6 +7,7 @@ import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 
 import org.w3c.dom.Document;
+import org.w3c.dom.NamedNodeMap;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 
@@ -25,12 +26,53 @@ public class DocumentParser {
 		DocumentBuilder db = dbf.newDocumentBuilder();
 		Document doc = db.parse(file);
 		
-		parseDocument(doc);
-		printFondDocuments();
+//		parseDocument(doc);
+//		printFondDocuments();
+		_printHeading3(doc);
 	}
 	
 	
 	
+	private void _printHeading3(Node node) {
+		NodeList nodes = node.getChildNodes();
+		if(node.getNodeName().equals("w:pPr")){
+			isFond(node);
+		}
+		for(int i = 0; i < nodes.getLength(); i++){			
+			_printHeading3(nodes.item(i));
+		}		
+	}
+
+	private void isFond(Node node) {
+		NodeList nodes = node.getChildNodes();
+		NamedNodeMap attrs = node.getAttributes();
+		
+		if(node.getNodeName().equals("w:pStyle") && attrs.getNamedItem("w:val").getNodeValue().equals("Heading3")){
+			System.out.println("attribute found");
+//			getFondText(node);
+		}
+	}
+
+
+
+	private void getFondText(Node node){
+		NodeList nodes = node.getChildNodes();
+
+	}
+
+	private void _printAttributes(Node node, NamedNodeMap attrs) {
+		
+		if(attrs == null){
+			System.out.println("No atttributes");
+		} else{
+			for(int i = 0; i < attrs.getLength(); i++){
+				System.out.println(attrs.item(i));
+			}
+		}
+	}
+
+
+
 	private void printFondDocuments() {
 		for(FondDocument fd: documents){
 			System.out.println(fd.toString());			
@@ -98,7 +140,7 @@ public class DocumentParser {
 	}
 	
 	
-	private void makeFond()
+
 	
 public static void main(String[] args) throws Exception {					
 		file = new File(args[0]);
