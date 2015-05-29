@@ -15,76 +15,27 @@ public class DocumentParser {
 
 	static File file; 
 	
-//	public int fondDocumentNumber = 1;
-	
 	Vector<FondDocument> documents = new Vector<FondDocument>();
-	
 	Vector<Fond> fonds = new Vector<Fond>();
+	Vector<String> headings = new Vector<String>();
 	
 	public void run() throws Exception{
 		DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
 		DocumentBuilder db = dbf.newDocumentBuilder();
 		Document doc = db.parse(file);
 		
-//		parseDocument(doc);
-//		printFondDocuments();
-		_printHeading3(doc);
+		parseDocument(doc);
+		getHeading3(doc);
+		createFond();
 	}
 	
 	
+	//PARSING THE DOCUMENT
 	
-	private void _printHeading3(Node node) {
-		NodeList nodes = node.getChildNodes();
-		if(node.getNodeName().equals("w:pPr")){
-			isFond(node);
-		}
-		for(int i = 0; i < nodes.getLength(); i++){			
-			_printHeading3(nodes.item(i));
-		}		
-	}
-
-	private void isFond(Node node) {
-		NodeList nodes = node.getChildNodes();
-		NamedNodeMap attrs = node.getAttributes();
-		
-		if(node.getNodeName().equals("w:pStyle") && attrs.getNamedItem("w:val").getNodeValue().equals("Heading3")){
-			System.out.println("attribute found");
-//			getFondText(node);
-		}
-	}
-
-
-
-	private void getFondText(Node node){
-		NodeList nodes = node.getChildNodes();
-
-	}
-
-	private void _printAttributes(Node node, NamedNodeMap attrs) {
-		
-		if(attrs == null){
-			System.out.println("No atttributes");
-		} else{
-			for(int i = 0; i < attrs.getLength(); i++){
-				System.out.println(attrs.item(i));
-			}
-		}
-	}
-
-
-
-	private void printFondDocuments() {
-		for(FondDocument fd: documents){
-			System.out.println(fd.toString());			
-		}		
-	}
-
-
 
 	private void parseDocument(Node node) {
 		
 		if(node.getNodeName().equals("w:tbl")){
-//			System.out.println("Table found");
 			parseTable(node);
 		}else{
 			NodeList nodes = node.getChildNodes();
@@ -97,7 +48,6 @@ public class DocumentParser {
 	
 	private void parseTable(Node node) {
 		if(node.getNodeName().equals("w:tr")){
-//			System.out.println("\t" + "Row Found");
 			parseRow(node);
 		}else{
 			NodeList nodes = node.getChildNodes();
@@ -140,9 +90,65 @@ public class DocumentParser {
 	}
 	
 	
-
+	//GETTING THE HEADING
 	
-public static void main(String[] args) throws Exception {					
+	
+	private void getHeading3(Node node) {
+		NodeList nodes = node.getChildNodes();
+		if(node.getNodeName().equals("w:pPr")){
+			System.out.println("Node Found");
+			isNodeAFond(node);
+		}
+		for(int i = 0; i < nodes.getLength(); i++){			
+			getHeading3(nodes.item(i));
+		}		
+	}
+
+	private void isNodeAFond(Node node) {
+		NodeList nodes = node.getChildNodes();
+		NamedNodeMap attrs = node.getAttributes();
+		
+		if(node.getNodeName().equals("w:pStyle") && attrs.getNamedItem("w:val").getNodeValue().equals("Heading3")){
+			getFondText(node.getParentNode().getParentNode());
+		}
+		for(int i = 0; i < nodes.getLength(); i++){			
+			isNodeAFond(nodes.item(i));
+		}		
+	}
+
+
+	private void getFondText(Node node){
+		NodeList nodes = node.getChildNodes();
+		
+		if(node.getNodeName().equals("w:r")){
+			headings.add(node.getTextContent());
+		}
+		for(int i = 0; i < nodes.getLength(); i++){			
+			getFondText(nodes.item(i));
+		}		
+	}
+	
+	
+	//CREATING THE FONDS AND PUTTING THEM INTO THE VECTOR
+	
+
+	private void createFond() {
+		for(int i = 0; i <= headings.size(); i++){
+			Fond fond = new Fond();
+			
+			fond.heading = headings.get(i);
+			fond.doc = documents;
+			
+			fonds.add(fond);
+		}
+	}
+	
+	
+	//PRINTING THE FONDS
+	
+	
+	
+	public static void main(String[] args) throws Exception {					
 		file = new File(args[0]);
 		new DocumentParser().run();		
 	}
