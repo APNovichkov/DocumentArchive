@@ -17,7 +17,14 @@ public class DocumentParser {
 	
 	Vector<FondDocument> documents = new Vector<FondDocument>();
 	Vector<Fond> fonds = new Vector<Fond>();
-	Vector<String> headings = new Vector<String>();
+	
+	String heading;
+	
+	public final int NONE = 1;
+	public final int HEADERFOUND = 2;
+	public final int PROCESSINGTABLE = 3;
+	
+	public int currentParsingStep = NONE;
 	
 	public void run() throws Exception{
 		DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
@@ -25,8 +32,6 @@ public class DocumentParser {
 		Document doc = db.parse(file);
 		
 		parseDocument(doc);
-		getHeading3(doc);
-		createFond();
 	}
 	
 	
@@ -34,9 +39,16 @@ public class DocumentParser {
 	
 
 	private void parseDocument(Node node) {
-		
-		if(node.getNodeName().equals("w:tbl")){
+		if(node.getNodeName().equals("w:pPr") && currentParsingStep == NONE){
+			System.out.println("Node Found");
+			isNodeAFond(node);
+			currentParsingStep = HEADERFOUND;
+		}else if(node.getNodeName().equals("w:tbl") && currentParsingStep == HEADERFOUND){
+			currentParsingStep = PROCESSINGTABLE;
 			parseTable(node);
+			currentParsingStep = NONE;
+			createFond();
+			deleteDocumentsFromVector();
 		}else{
 			NodeList nodes = node.getChildNodes();
 			for(int i = 0; i < nodes.getLength(); i++){			
@@ -46,6 +58,13 @@ public class DocumentParser {
 		}
 	}
 	
+	private void deleteDocumentsFromVector() {
+		for(int i = 0; i <= documents.size(); i++){
+			documents.remove(i);
+		}
+		
+	}
+
 	private void parseTable(Node node) {
 		if(node.getNodeName().equals("w:tr")){
 			parseRow(node);
@@ -58,7 +77,6 @@ public class DocumentParser {
 	}
 
 	private void parseRow(Node node) {
-	
 		FondDocument doc = new FondDocument();				
 		NodeList cells = node.getChildNodes();
 		
@@ -93,17 +111,6 @@ public class DocumentParser {
 	//GETTING THE HEADING
 	
 	
-	private void getHeading3(Node node) {
-		NodeList nodes = node.getChildNodes();
-		if(node.getNodeName().equals("w:pPr")){
-			System.out.println("Node Found");
-			isNodeAFond(node);
-		}
-		for(int i = 0; i < nodes.getLength(); i++){			
-			getHeading3(nodes.item(i));
-		}		
-	}
-
 	private void isNodeAFond(Node node) {
 		NodeList nodes = node.getChildNodes();
 		NamedNodeMap attrs = node.getAttributes();
@@ -121,7 +128,7 @@ public class DocumentParser {
 		NodeList nodes = node.getChildNodes();
 		
 		if(node.getNodeName().equals("w:r")){
-			headings.add(node.getTextContent());
+			heading = node.getTextContent();
 		}
 		for(int i = 0; i < nodes.getLength(); i++){			
 			getFondText(nodes.item(i));
@@ -129,18 +136,17 @@ public class DocumentParser {
 	}
 	
 	
-	//CREATING THE FONDS AND PUTTING THEM INTO THE VECTOR
+	//CREATING THE FOND AND PUTTING IT INTO THE VECTOR
 	
 
 	private void createFond() {
-		for(int i = 0; i <= headings.size(); i++){
-			Fond fond = new Fond();
+		
+		Fond fond = new Fond();
 			
-			fond.heading = headings.get(i);
-			fond.doc = documents;
+		fond.heading = heading;
+		fond.docs = documents;
 			
-			fonds.add(fond);
-		}
+		fonds.add(fond);
 	}
 	
 	

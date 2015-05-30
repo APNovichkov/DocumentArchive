@@ -4,5 +4,5 @@ import java.util.Vector;
 
 public class Fond {
 	String heading;
-	Vector<FondDocument> doc = new Vector<FondDocument>();
+	Vector<FondDocument> docs = new Vector<FondDocument>();
 }

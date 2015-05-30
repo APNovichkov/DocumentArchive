@@ -9,6 +9,7 @@ public class FondDocument {
 	String pagesNumber;
 	String comments;
 		
+	int fondNumber;
 	
 	public String _toString(){
 		return 
