@@ -15,15 +15,13 @@ public class DocumentParser {
 
 	static File file; 
 	
-	Vector<FondDocument> documents = new Vector<FondDocument>();
 	Vector<Fond> fonds = new Vector<Fond>();
-	
-	String heading;
+	Fond currentFond = null;
 	
 	public final int NONE = 1;
 	public final int HEADERFOUND = 2;
 	public final int PROCESSINGTABLE = 3;
-	
+
 	public int currentParsingStep = NONE;
 	
 	public void run() throws Exception{
@@ -32,6 +30,7 @@ public class DocumentParser {
 		Document doc = db.parse(file);
 		
 		parseDocument(doc);
+		printFond();
 	}
 	
 	
@@ -39,31 +38,47 @@ public class DocumentParser {
 	
 
 	private void parseDocument(Node node) {
-		if(node.getNodeName().equals("w:pPr") && currentParsingStep == NONE){
-			System.out.println("Node Found");
-			isNodeAFond(node);
-			currentParsingStep = HEADERFOUND;
-		}else if(node.getNodeName().equals("w:tbl") && currentParsingStep == HEADERFOUND){
-			currentParsingStep = PROCESSINGTABLE;
-			parseTable(node);
-			currentParsingStep = NONE;
-			createFond();
-			deleteDocumentsFromVector();
+		if(node.getNodeName().equals("w:p")){
+			if(isNodeAFond(node)){
+				
+				switch(currentParsingStep){
+					case NONE:{
+						createFond(node);
+						currentParsingStep = HEADERFOUND;					
+						break;
+					}
+					case HEADERFOUND:{
+						System.out.println("ERROR: new fond found after fond:" + currentFond.name);
+						currentParsingStep = NONE;
+						break;
+					}
+				}
+			}
+			
+		}else if(node.getNodeName().equals("w:tbl") ){
+			
+			switch(currentParsingStep){
+				case NONE:{
+					System.out.println("ERROR: table found but no fond header was found");
+					currentParsingStep = NONE;
+					break;
+				}
+				case HEADERFOUND:{
+					parseTable(node);
+					currentParsingStep = NONE;
+					break;
+				}
+			}
+			
+			
 		}else{
 			NodeList nodes = node.getChildNodes();
 			for(int i = 0; i < nodes.getLength(); i++){			
 				parseDocument(nodes.item(i));
-				
 			}		
 		}
 	}
 	
-	private void deleteDocumentsFromVector() {
-		for(int i = 0; i <= documents.size(); i++){
-			documents.remove(i);
-		}
-		
-	}
 
 	private void parseTable(Node node) {
 		if(node.getNodeName().equals("w:tr")){
@@ -86,7 +101,7 @@ public class DocumentParser {
 		doc.pagesNumber = getText(cells.item(3));
 		doc.comments = getText(cells.item(4));
 		
-		documents.add(doc);
+		currentFond.docs.add(doc);
 	}
 	
 	private String getText(Node node){
@@ -111,48 +126,61 @@ public class DocumentParser {
 	//GETTING THE HEADING
 	
 	
-	private void isNodeAFond(Node node) {
-		NodeList nodes = node.getChildNodes();
-		NamedNodeMap attrs = node.getAttributes();
+	private boolean isNodeAFond(Node node) {
 		
-		if(node.getNodeName().equals("w:pStyle") && attrs.getNamedItem("w:val").getNodeValue().equals("Heading3")){
-			getFondText(node.getParentNode().getParentNode());
-		}
-		for(int i = 0; i < nodes.getLength(); i++){			
-			isNodeAFond(nodes.item(i));
-		}		
+		Node pprNode = node.getFirstChild(); 
+		if(pprNode == null) return false;
+		if(!pprNode.getNodeName().equals("w:pPr")) return false;
+		
+		Node styleNode = pprNode.getFirstChild();
+		if(styleNode == null) return false;
+		if(!styleNode.getNodeName().equals("w:pStyle")) return false;
+		
+		NamedNodeMap attrs = styleNode.getAttributes();
+		return attrs.getNamedItem("w:val").getNodeValue().equals("Heading3"); 
 	}
 
 
-	private void getFondText(Node node){
-		NodeList nodes = node.getChildNodes();
+	private String getFondText(Node node){
+		StringBuffer sb = new StringBuffer();
+		collectText(node, sb);
+		return sb.toString();
+	}
+	
+	private void collectText(Node node, StringBuffer sb ){
 		
+		NodeList nodes = node.getChildNodes();
 		if(node.getNodeName().equals("w:r")){
-			heading = node.getTextContent();
+			sb.append(node.getTextContent());
 		}
 		for(int i = 0; i < nodes.getLength(); i++){			
-			getFondText(nodes.item(i));
+			collectText(nodes.item(i), sb);
 		}		
 	}
+	
+	
 	
 	
 	//CREATING THE FOND AND PUTTING IT INTO THE VECTOR
 	
 
-	private void createFond() {
+	private void createFond(Node node) {
 		
-		Fond fond = new Fond();
+		currentFond = new Fond();
 			
-		fond.heading = heading;
-		fond.docs = documents;
-			
-		fonds.add(fond);
+		currentFond.name = getFondText(node);
+		fonds.add(currentFond);		
+//		System.out.println("fond created");
 	}
 	
 	
 	//PRINTING THE FONDS
 	
-	
+	private void printFond(){
+		for(int i = 0; i <= fonds.size(); i++){
+			System.out.println(fonds.get(i).name + "\t\t\t" + fonds.get(i).docs);
+		}
+	}
 	
 	public static void main(String[] args) throws Exception {					
 		file = new File(args[0]);
