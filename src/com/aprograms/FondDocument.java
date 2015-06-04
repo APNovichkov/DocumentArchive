@@ -9,23 +9,30 @@ public class FondDocument {
 	String pagesNumber;
 	String comments;
 		
-	int fondNumber;
+	String tags;
+	String nonTags;
 	
-	public String _toString(){
-		return 
-				"docNumber=" + docNumber 
-				+ "\tdocName=" + docName 
-				+ "\tdocDates=" + docDates 
-				+ "\tpagesNumber=" + pagesNumber
-				+ "\tcomments=" + comments;
-	}
+	
+	final String TAG_NAME ="ярлыки:";
 	
 	public String toString(){
 		return "Fond document"
-				+ "\n\t" + docNumber 
-				+ "\n\t" + docName 
-				+ "\n\t" + docDates 
-				+ "\n\t" + pagesNumber
-				+ "\n\t" + comments;
+				+ ":\t" + docNumber 
+//				+ "\t" + docName 
+//				+ "\t" + docDates 
+//				+ "\t" + pagesNumber
+//				+ "\t" + comments
+				+ "\tnonTags = " + nonTags
+				+ "\ttags = " + tags
+				;
+	}
+	
+	
+	public void parseComments(){
+		int pos = comments.indexOf(TAG_NAME);
+		if(pos >= 0){
+			nonTags = comments.substring(0, pos).trim();
+			tags = comments.substring(pos + TAG_NAME.length()).trim();
+		}
 	}
 }
