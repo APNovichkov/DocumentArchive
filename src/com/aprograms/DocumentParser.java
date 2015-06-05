@@ -33,6 +33,12 @@ public class DocumentParser {
 		
 		parseDocument(doc);
 		fondArchive.print();
+		
+		try{
+			fondArchive.dumpCSV();
+		} catch(Exception e){
+			e.printStackTrace();
+		}
 	}
 	
 	
@@ -170,7 +176,10 @@ public class DocumentParser {
 	}
 	
 	
-	//GETTING FOND, GROUPFOND TEXT, OR FOND SUBNAME TEXT
+	/**
+	 * Getting Text and Sub Name from a Node
+	 * @param node
+	 */
 	
 	private String getFondOrFondGroupText(Node node){
 		StringBuffer sb = new StringBuffer();
@@ -178,11 +187,7 @@ public class DocumentParser {
 		return sb.toString();
 	}
 	
-	/**
-	 * 
-	 * @param node
-	 * @param sb
-	 */
+	
 	private void collectText(Node node, StringBuffer sb ){
 		
 		NodeList nodes = node.getChildNodes();
@@ -208,7 +213,10 @@ public class DocumentParser {
 	}
 
 	
-	//IS HEADING A FOND, FONDGROUP, OR SUBNAME OF A FOND
+	/**
+	 * What is a heading
+	 * @param node
+	 */
 	
 	
 	private boolean isNodeAFondOrFondGroup(Node node, String heading) {
@@ -227,7 +235,10 @@ public class DocumentParser {
 	}
 
 	
-	//CREATING THE FOND, FOND GROUP, AND FOND ARCHIVE 
+	/**
+	 * Creating FondGroup and Fond
+	 * @param node
+	 */
 	
 	
 	private void createFondGroup(Node node) {
